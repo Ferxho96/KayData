@@ -1,2 +1,2 @@
-# KayData
-This is a KayData projects repository
+# Personal Repository
+This is my personal repository
