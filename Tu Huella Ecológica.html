@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Huella Ecológica</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1{
+            font-size: 28px; /* Tamaño reducido para h1 */
+            color: #2c7873;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 24px; /* Tamaño reducido para h2 */
+            color: #2c7873;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 20px; /* Tamaño reducido para h3 */
+            color: #2c7873;
+            margin-bottom: 10px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        button {
+            background-color: #2c7873;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #1a5653;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f5f3;
+            border-radius: 5px;
+            border-left: 5px solid #2c7873;
+        }
+        
+        .highlight {
+            font-weight: bold;
+            color: #2c7873;
+        }
+        
+        .result-detail {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        
+        .progress-container {
+            position: relative;
+            margin-top: 20px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            height: 25px;
+        }
+        .progress-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 100%; /* Posición del límite (1.75 tCO₂e/año) */
+            width: 2px;
+            height: 100%;
+            background-color: #2c7873; /* Color del marcador */
+            transform: translateX(-100%); /* Ajustar la posición */
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .progress-bar-low {
+            background-color: #4caf50;
+        }
+        
+        .progress-bar-high {
+            background-color: #f44336;
+        }
+        
+        .recommendations {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 5px;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #2c7873;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        /* Estilos específicos para móviles (aplicados solo en pantallas ≤ 768px) */
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 12px; /* Tamaño de fuente más pequeño */
+                padding: 6px; /* Padding reducido */
+            }
+        }
+        
+        .info-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background-color: #2c7873;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            cursor: help;
+            margin-left: 5px;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: normal;
+            font-size: 14px;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .cta-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .cta-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Huella Ecológica</h1>
+        <p>Calcula tu impacto ambiental basado en tus hábitos diarios. Esta herramienta te ayudará a entender cómo tus decisiones cotidianas afectan al planeta.</p>
+        
+        <div class="section">
+            <h2>Transporte</h2>
+            
+            <div class="form-group">
+                <label for="transporte">¿Qué medio de transporte utilizas principalmente? 
+                    <span class="tooltip info-icon">i
+                        <span class="tooltiptext">El tipo de transporte que usas tiene un gran impacto en tu huella de carbono.</span>
+                    </span>
+                </label>
+                <select id="transporte">
+                    <option value="vehículo">Vehículo particular</option>
+                    <option value="bus">Transporte público (bus/metro)</option>
+                    <option value="moto">Motocicleta</option>
+                    <option value="bicicleta">Bicicleta</option>
+                    <option value="caminando">Caminando</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="dias_transporte">¿Cuántos días a la semana usas este transporte?</label>
+                <input type="number" id="dias_transporte" min="0" max="7" value="5">
+            </div>
+            
+            <div class="form-group">
+                <label for="km_dia">¿Cuántos kilómetros recorres aproximadamente al día?</label>
+                <input type="number" id="km_dia" min="0" value="15">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Residuos y Reciclaje</h2>
+            
+            <div class="form-group">
+                <label for="bolsas_basura">¿Cuántas bolsas de basura generas por semana en tu hogar?
+                    <span class="tooltip info-icon">i
+                        <span class="tooltiptext">Una bolsa estándar tiene aproximadamente 50 litros de capacidad.</span>
+                    </span>
+                </label>
+                <input type="number" id="bolsas_basura" min="0" value="3">
+            </div>
+            
+            <div class="form-group">
+                <label for="reciclaje">¿Qué porcentaje de tus residuos reciclas aproximadamente?</label>
+                <input type="number" id="reciclaje" min="0" max="100" value="30">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Consumo Energético</h2>
+            
+            <div class="form-group">
+                <label for="factura_electricidad">¿Cuánto pagas aproximadamente en tu factura mensual de electricidad (USD)?
+                    <span class="tooltip info-icon">i
+                        <span class="tooltiptext">Usamos este valor para estimar tu consumo eléctrico mensual.</span>
+                    </span>
+                </label>
+                <input type="number" id="factura_electricidad" min="0" value="50">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Consumo de Agua</h2>
+            
+            <div class="form-group">
+                <label for="duchas_semana">¿Cuántas duchas tomas a la semana en promedio?</label>
+                <input type="number" id="duchas_semana" min="0" max="70" step="1" value="7">
+            </div>
+            
+            <div class="form-group">
+                <label for="tiempo_ducha">¿Cuántos minutos dura tu ducha en promedio?</label>
+                <input type="number" id="tiempo_ducha" min="0" value="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="calentamiento_agua">¿Cómo calientas el agua para la ducha?</label>
+                <select id="calentamiento_agua">
+                    <option value="electricidad">Electricidad</option>
+                    <option value="gas">Gas</option>
+                    <option value="ninguno">No caliento el agua</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Alimentación</h2>
+            
+            <div class="form-group">
+                <label for="carne">¿Cuántas veces a la semana consumes carne?
+                    <span class="tooltip info-icon">i
+                        <span class="tooltiptext">La producción de carne es una de las actividades que más emisiones de CO₂ genera.</span>
+                    </span>
+                </label>
+                <select id="carne">
+                    <option value="menos de 3 veces">Menos de 3 veces por semana</option>
+                    <option value="3-5 veces" selected>Entre 3 y 5 veces por semana</option>
+                    <option value="más de 5 veces">Más de 5 veces por semana</option>
+                    <option value="no consumo">No consumo carne</option>
+                </select>
+            </div>
+        </div>
+        
+        <button id="calcular">Calcular Mi Huella Ecológica</button>
+        
+        <div id="resultados" class="results" style="display: none;">
+            <h2>Resultados de tu Huella Ecológica</h2>
+            
+            <div id="resumen-huella"></div>
+            
+            <div class="progress-container">
+                <div id="barra-progreso" class="progress-bar">0%</div>
+            </div>
+            
+            <div class="result-detail">
+                <h3>Detalle de tu Huella de Carbono</h3>
+                <table id="tabla-emisiones">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Emisiones (tCO₂e/año)</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalle-emisiones">
+                        <!-- Se llenará dinámicamente -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total</th>
+                            <th id="total-emisiones">0</th>
+                            <th>100%</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="grafico-huella"></canvas>
+            </div>
+        </div>
+        
+        <div id="recomendaciones" class="recommendations" style="display: none;">
+            <h2>Recomendaciones para Reducir tu Huella</h2>
+            <div id="lista-recomendaciones"></div>
+            
+            <div class="cta-container">
+                <p>¡Reduce tu huella ecológica con nuestros productos agroecológicos!</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Factores de emisión según la metodología proporcionada
+            const FACTORES = {
+                transporte: {
+                    "vehículo": 0.213, // kg CO2/km
+                    "bus": 0.035,      // kg CO2/km
+                    "moto": 0.117,     // kg CO2/km
+                    "bicicleta": 0,    // kg CO2/km
+                    "caminando": 0     // kg CO2/km
+                },
+                residuos: 0.81, // kg/hab/día
+                carne: {
+                    "menos de 3 veces": 0.5,   // kg CO2/día
+                    "3-5 veces": 1.0,          // kg CO2/día
+                    "más de 5 veces": 1.5,     // kg CO2/día
+                    "no consumo": 0.2          // kg CO2/día (valor menor para dietas vegetarianas)
+                },
+                electricidad: 0.1200   // tCO2e/MWh
+            };
+            
+            // Biocapacidad mundial y de Ecuador
+            const biocapacidadMundial = 1.75; // hag
+            const biocapacidadEcuador = 2.16; // hag
+            const huellaEcuador = 1.73; // hag
+            
+            // Evento al hacer clic en el botón calcular
+            document.getElementById('calcular').addEventListener('click', function() {
+                calcularHuella();
+            });
+            
+            function calcularHuella() {
+                // Obtener respuestas del formulario
+                const respuestas = {
+                    transporte: document.getElementById('transporte').value,
+                    dias_transporte: parseInt(document.getElementById('dias_transporte').value) || 0,
+                    km_dia: parseFloat(document.getElementById('km_dia').value) || 0,
+                    bolsas_basura: parseInt(document.getElementById('bolsas_basura').value) || 0,
+                    reciclaje: parseFloat(document.getElementById('reciclaje').value) || 0,
+                    factura_electricidad: parseFloat(document.getElementById('factura_electricidad').value) || 0,
+                    duchas_semana: parseFloat(document.getElementById('duchas_semana').value) || 0,
+                    tiempo_ducha: parseFloat(document.getElementById('tiempo_ducha').value) || 0,
+                    carne: document.getElementById('carne').value
+                };
+                
+                // Calcular huella de transporte
+                let huellaTransporte = 0;
+                if (respuestas.transporte in FACTORES.transporte) {
+                    huellaTransporte = (FACTORES.transporte[respuestas.transporte] * respuestas.km_dia * 
+                                      respuestas.dias_transporte * 52) / 1000; // Convertir a tCO2e
+                }
+                
+                // Calcular huella de residuos
+                const porcentajeReciclaje = respuestas.reciclaje / 100; // Convertir a proporción
+                const huellaResiduos = (FACTORES.residuos * 365 / 1000) * respuestas.bolsas_basura * (1 - porcentajeReciclaje);
+                
+                // Calcular huella de energía
+                const consumoKWh = respuestas.factura_electricidad * 10; // Aproximadamente 10 kWh/USD
+                const huellaEnergia = (consumoKWh * 12 / 1000) * FACTORES.electricidad; // tCO₂e/año
+                
+                // Calcular huella de agua
+                const consumoAgua = (respuestas.duchas_semana * respuestas.tiempo_ducha * 0.017) / 7; // m³ de agua usada (ajustado a la semana)
+                const emisionesAguaPotable = consumoAgua * 52 * 0.42 / 1000; // tCO₂e/año por uso de agua potable
+
+                let emisionesCalentamientoAgua = 0;
+
+                if (respuestas.calentamiento_agua === "electricidad") {
+                 // Suponemos que se usan 2 kWh por ducha para calentar el agua
+                    const kWhPorDucha = 2;
+                    const emisionesElectricidad = (respuestas.duchas_semana * kWhPorDucha * 52 * 0.38) / 1000; // tCO₂e
+                    emisionesCalentamientoAgua = emisionesElectricidad;
+                } else if (respuestas.calentamiento_agua === "gas") {
+                    // Suponemos que se usan 0.5 litros de GLP por ducha para calentar el agua
+                    const litrosGLPPorDucha = 0.5;
+                    const emisionesGas = (respuestas.duchas_semana * litrosGLPPorDucha * 52 * 0.2) / 1000; // tCO₂e
+                    emisionesCalentamientoAgua = emisionesGas;
+                }
+const huellaAgua = emisionesAguaPotable + emisionesCalentamientoAgua;
+                
+                // Calcular huella de alimentación
+                const huellaAlimentacion = FACTORES.carne[respuestas.carne] * 365 / 1000; // tCO2e
+                
+                // Calcular huella total
+                const huellaTotal = huellaTransporte + huellaResiduos + huellaEnergia + huellaAgua + huellaAlimentacion;
+                
+                // Mostrar resultados
+                document.getElementById('resultados').style.display = 'block';
+                document.getElementById('recomendaciones').style.display = 'block';
+                
+                // Crear objeto con todos los datos de emisiones
+                const categorias = [
+                    { nombre: 'Transporte', valor: huellaTransporte },
+                    { nombre: 'Residuos', valor: huellaResiduos },
+                    { nombre: 'Energía', valor: huellaEnergia },
+                    { nombre: 'Agua', valor: huellaAgua },
+                    { nombre: 'Alimentación', valor: huellaAlimentacion }
+                ];
+                
+                // Ordenar categorías de mayor a menor impacto
+                categorias.sort((a, b) => b.valor - a.valor);
+                
+                // Calcular porcentajes respecto a la biocapacidad
+                const porcentajeMundial = (huellaTotal / biocapacidadMundial) * 100;
+                const porcentajeEcuador = (huellaTotal / biocapacidadEcuador) * 100;
+                
+                // Actualizar resumen
+                const resumenHuella = document.getElementById('resumen-huella');
+                resumenHuella.innerHTML = `
+                    <p>Tu huella de carbono es de <span class="highlight">${huellaTotal.toFixed(2)} tCO₂e/año</span>.</p>
+                    <p>Esto representa un <span class="highlight">${porcentajeMundial.toFixed(0)}%</span> de la biocapacidad mundial (${biocapacidadMundial} hag).</p>
+                    <p>En comparación con Ecuador (biocapacidad: ${biocapacidadEcuador} hag), tu huella representa un <span class="highlight">${porcentajeEcuador.toFixed(0)}%</span>.</p>
+                `;
+                
+                // Actualizar barra de progreso
+                const barraProgreso = document.getElementById('barra-progreso');
+                const limiteSostenible = biocapacidadMundial; // 1.75 tCO₂e/año
+
+                // Calcular el porcentaje de la huella respecto al límite de sostenibilidad
+                const porcentajeBarra = (huellaTotal / limiteSostenible) * 100;
+
+                // Limitar el ancho de la barra al 100% si la huella supera el límite
+                const anchoBarra = Math.min(porcentajeBarra, 100);
+
+                // Actualizar el ancho de la barra
+                barraProgreso.style.width = `${anchoBarra}%`;
+
+                // Actualizar el texto de la barra
+                barraProgreso.textContent = `${huellaTotal.toFixed(2)} tCO₂e/año`;
+                // Asignar clase según el porcentaje
+                if (huellaTotal <= limiteSostenible) {
+                    barraProgreso.className = 'progress-bar progress-bar-low';
+                } else {
+                    barraProgreso.className = 'progress-bar progress-bar-high';
+                }
+                // Actualizar tabla de detalle
+                const detalleEmisiones = document.getElementById('detalle-emisiones');
+                detalleEmisiones.innerHTML = '';
+                
+                categorias.forEach(categoria => {
+                    const porcentaje = (categoria.valor / huellaTotal) * 100;
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${categoria.nombre}</td>
+                        <td>${categoria.valor.toFixed(2)}</td>
+                        <td>${porcentaje.toFixed(1)}%</td>
+                    `;
+                    detalleEmisiones.appendChild(fila);
+                });
+                
+                // Actualizar total de emisiones
+                document.getElementById('total-emisiones').textContent = huellaTotal.toFixed(2);
+                
+                // Crear gráfico
+                crearGraficoHuella(categorias);
+                
+                // Llamar a la función para generar recomendaciones
+                generarRecomendaciones(categorias, huellaTotal, biocapacidadMundial);
+            }
+            
+            function crearGraficoHuella(categorias) {
+                const ctx = document.getElementById('grafico-huella').getContext('2d');
+                
+                // Destruir gráfico existente si hay uno
+                if (window.miGrafico) {
+                    window.miGrafico.destroy();
+                }
+                
+                // Preparar datos para el gráfico
+                const labels = categorias.map(c => c.nombre);
+                const datos = categorias.map(c => c.valor);
+                const colores = [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF'
+                ];
+                
+                // Crear gráfico de torta
+                window.miGrafico = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: datos,
+                            backgroundColor: colores,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw.toFixed(2);
+                                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((context.raw / total) * 100);
+                                        return `${label}: ${value} tCO₂e/año (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function generarRecomendaciones(categorias, huellaTotal, biocapacidadMundial) {
+                const listaRecomendaciones = document.getElementById('lista-recomendaciones');
+                listaRecomendaciones.innerHTML = '';
+                
+                // Mensaje general según la biocapacidad mundial
+                let mensajeGeneral = '';
+                if (huellaTotal <= biocapacidadMundial) {
+                    mensajeGeneral = `<p>¡Felicidades! Tu huella de carbono está dentro de los límites considerados sostenibles.
+                    Continúas contribuyendo positivamente a la lucha contra el cambio climático.</p>`;
+                } else {
+                    mensajeGeneral =  `<p>Tu huella de carbono supera la biocapacidad mundial (${biocapacidadMundial} hag).
+                     Es importante implementar cambios en tus hábitos diarios para reducir tu impacto ambiental y contribuir a la lucha contra el cambio climático.</p>`;
+                }
+                
+                listaRecomendaciones.innerHTML = mensajeGeneral;
+                
+                // Obtener las dos categorías con mayor impacto
+                const principalesImpactos = categorias.slice(0, 2);
+                
+                // Añadir recomendaciones específicas para las categorías con mayor impacto
+                listaRecomendaciones.innerHTML += '<h3>Recomendaciones personalizadas:</h3><ul>';
+                
+                principalesImpactos.forEach(impacto => {
+                    switch(impacto.nombre) {
+                        case 'Transporte':
+                            listaRecomendaciones.innerHTML += `
+                                <li><strong>Reduce tu huella de transporte:</strong>
+                                <ul>
+                                    <li>Considera usar transporte público, bicicleta o caminar para trayectos cortos.</li>
+                                    <li>Organiza trayectos compartidos con vecinos o compañeros de trabajo.</li>
+                                    <li>Realiza mantenimiento regular a tu vehículo para mejorar su eficiencia.</li>
+                                    <li>Considera la posibilidad de teletrabajar algunos días de la semana.</li>
+                                </ul>
+                                </li>
+                            `;
+                            break;
+                        case 'Residuos':
+                            listaRecomendaciones.innerHTML += `
+                                <li><strong>Mejora la gestión de tus residuos:</strong>
+                                <ul>
+                                    <li>Aumenta el porcentaje de residuos que reciclas separando correctamente.</li>
+                                    <li>Compra productos con menos embalaje o embalaje biodegradable.</li>
+                                    <li>Considera el compostaje de residuos orgánicos.</li>
+                                    <li>Nuestros productos agroecológicos vienen con envases reutilizables o biodegradables.</li>
+                                </ul>
+                                </li>
+                            `;
+                            break;
+                        case 'Energía':
+                            listaRecomendaciones.innerHTML += `
+                                <li><strong>Reduce tu consumo energético:</strong>
+                                <ul>
+                                    <li>Utiliza electrodomésticos eficientes con etiqueta energética A+++.</li>
+                                    <li>Apaga los dispositivos en lugar de dejarlos en standby.</li>
+                                    <li>Utiliza bombillas LED de bajo consumo.</li>
+                                    <li>Considera instalar paneles solares si es posible.</li>
+                                </ul>
+                                </li>
+                            `;
+                            break;
+                        case 'Agua':
+                            listaRecomendaciones.innerHTML += `
+                                <li><strong>Optimiza tu consumo de agua:</strong>
+                                <ul>
+                                    <li>Reduce el tiempo de ducha a 5 minutos o menos.</li>
+                                    <li>Instala dispositivos ahorradores en grifos y duchas.</li>
+                                    <li>Repara fugas de agua en tu hogar.</li>
+                                    <li>Reutiliza el agua cuando sea posible (por ejemplo, agua de la lavadora para el inodoro).</li>
+                                </ul>
+                                </li>
+                            `;
+                            break;
+                        case 'Alimentación':
+                            listaRecomendaciones.innerHTML += `
+                                <li><strong>Mejora tus hábitos alimenticios:</strong>
+                                <ul>
+                                    <li>Reduce el consumo de carne, especialmente carne roja.</li>
+                                    <li>Introduce más días vegetarianos en tu dieta semanal.</li>
+                                    <li>Consume alimentos locales y de temporada para reducir la huella de transporte.</li>
+                                    <li>En nuestra tienda encontrarás productos agroecológicos locales que reducen significativamente tu huella de carbono.</li>
+                                </ul>
+                                </li>
+                            `;
+                            break;
+                    }
+                });
+                
+                listaRecomendaciones.innerHTML += '</ul>';
+                
+                // Añadir recomendaciones sobre productos agroecológicos
+                listaRecomendaciones.innerHTML += `
+                    <h3>¿Cómo pueden ayudarte nuestros productos agroecológicos?</h3>
+                    <p>Los alimentos agroecológicos contribuyen significativamente a reducir tu huella ecológica debido a:</p>
+                    <ul>
+                        <li><strong>Producción local:</strong> Nuestros productos son cultivados cerca, reduciendo las emisiones por transporte.</li>
+                        <li><strong>Sin químicos:</strong> El cultivo agroecológico evita el uso de fertilizantes y pesticidas químicos que contribuyen al cambio climático.</li>
+                        <li><strong>Embalaje sostenible:</strong> Utilizamos envases mínimos, biodegradables o reutilizables.</li>
+                        <li><strong>Mayor captura de carbono:</strong> Las prácticas agroecológicas mejoran la salud del suelo, capturando más CO₂.</li>
+                    </ul>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
